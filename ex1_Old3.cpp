@@ -16,18 +16,11 @@ map <UINT32, string> RTNNAMES;
 
 class RoutineData {
 public:
-  /*RTN Routine;
-  IMG Img;*/
+  RTN Routine;
+  IMG Img;
   UINT32 Count;
-  ADDRINT _RTN_ADDRESS;
-  string _RTN_NAME;
-  ADDRINT _IMG_ADDRESS;
-  string _IMG_NAME;
-  /*RoutineData(RTN rtn, IMG img)
-    : Routine(rtn), Img(img), Count(0) {}*/
-  RoutineData(ADDRINT rtnAddress,string rtnName, ADDRINT imgAddress, string imgName)
-    : Count(0), _RTN_ADDRESS(rtnAddress), _RTN_NAME(rtnName),
-      _IMG_ADDRESS(imgAddress), _IMG_NAME(imgName) {}
+  RoutineData(RTN rtn, IMG img)
+    : Routine(rtn), Img(img), Count(0) {}
 };
 
 //RoutineData rtnData;
@@ -70,15 +63,13 @@ VOID BasicBlock(TRACE trc , VOID *v)
 		RTN CurrentRTN = RTN_FindByAddress(BBL_Address(bbl));
 		UINT32 CurrentId = RTN_Id(CurrentRTN);
 
-    ADDRINT RoutineAddress = RTN_Address(CurrentRTN);
-    string RoutineName = RTN_FindNameByAddress(BBL_Address(bbl));
+    //ADDRINT RoutinAddress = RTN_Address(CurrentRTN);
 
     IMG CurrentImg = IMG_FindByAddress(BBL_Address(bbl));
-    string ImgName = IMG_Name(CurrentImg);
-    ADDRINT ImgAddress = IMG_Entry(CurrentImg);//Check if right function
+    //string ImgName = IMG_Name(CurrentImg);
+    //ADDRINT ImgAddress = IMG_Entry(CurrentImg);//Check if right function
     if (RoutineMap.find(CurrentId) == RoutineMap.end()) {
-        //RoutineData rtnData(CurrentRTN, CurrentImg);
-        RoutineData rtnData(RoutineAddress, RoutineName, ImgAddress, ImgName);
+        RoutineData rtnData(CurrentRTN, CurrentImg);
         //RoutineData* rtnData = new RoutineData(CurrentRTN, CurrentImg);
         RoutineMap.insert(pair<UINT32,RoutineData>(CurrentId,rtnData));
 
@@ -100,33 +91,26 @@ VOID BasicBlock(TRACE trc , VOID *v)
 VOID Fini(INT32 code, VOID *v)
 {
 	//open file
-	//ofstream oFile;
-	//oFile.open("rtn-output.csv");
+	ofstream oFile;
+	oFile.open("rtn-output.csv");
   map <UINT32,RoutineData> MaxMap;
   for (map<UINT32,RoutineData>::iterator iter = RoutineMap.begin(); iter != RoutineMap.end(); ++iter) {
     UINT32 Count = (iter->second).Count;
-    //cout << "Count: " << Count << endl;
     MaxMap.insert(pair<UINT32,RoutineData>(Count,iter->second));
   }
   for (map<UINT32,RoutineData>::iterator iter = MaxMap.begin(); iter != MaxMap.end(); ++iter) {
-    /*RTN Routine((iter->second).Routine);
-    IMG Img((iter->second).Img);
-    if (IMG_Valid(Img) == false) {
-      cout << "0" << endl;
-    }
-    if (RTN_Valid(Routine) == false) {
-      cout << "1" << endl;
-    }*/
-    /*ADDRINT ImgAddress = IMG_Entry(Img);
+    RTN Routine = (iter->second).Routine;
+    IMG Img = (iter->second).Img;
+    string ImgAddress = "0x" + IMG_Entry(Img);
     string ImgName = IMG_Name(Img);
-    ADDRINT RoutineAddress = RTN_Address(Routine);
+    string RoutineAddress = "0x" + RTN_Address(Routine);
     string RoutineName = RTN_Name(Routine);
     UINT32 Count = iter->first;
     oFile << "," << ImgAddress << "," << ImgName << "," << RoutineAddress << ","
-    << RoutineName << "," << Count << endl;*/
+    << RoutineName << "," << Count << endl;
   }
   //oFile << '"' << it_CurrentName->second << '"' << " icount " << it_CurrentNumber->second << endl;
-	//oFile.close(); //close file
+	oFile.close(); //close file
 }
 
 /* ===================================================================== */
